@@ -1,0 +1,9 @@
+*.png
+*.csv
+*.parquet
+*.txt
+__pycache__/
+.ipynb_checkpoints/
+*.jpg
+*.jpeg
+*.gif

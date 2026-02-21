@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 """
 Recurrent Neural Network Models for South Park Character Classification
 
