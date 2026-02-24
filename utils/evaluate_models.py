@@ -20,8 +20,30 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report
 )
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 from typing import Dict, List, Tuple, Optional
+from collections import Counter
 import pandas as pd
+
+SP_RED = "#E0383F"
+SP_ORANGE = "#E67322"
+SP_YELLOW = "#FFE01C"
+SP_GREEN = "#5CC146"
+SP_BROWN = "#7F4134"
+SP_BLUE = "#017CC2"
+SP_LIGHT_BLUE = "#5CBFD5"
+
+COLOR_DICT = {
+    'red': SP_RED,
+    'orange': SP_ORANGE,
+    'yellow': SP_YELLOW,
+    'green': SP_GREEN,
+    'brown': SP_BROWN,
+    'blue': SP_BLUE,
+    'light_blue': SP_LIGHT_BLUE
+}
+
+gradient_cmap = LinearSegmentedColormap.from_list("sp_performance", [SP_RED, SP_ORANGE, SP_YELLOW, SP_GREEN])
 
 
 def evaluate_model(
@@ -220,38 +242,68 @@ def print_evaluation_report(
 def plot_confusion_matrix(
     y_true: np.ndarray,
     y_pred: np.ndarray,
-    class_names: List[str],
-    title: str = "Confusion Matrix",
+    title: str = "Character Classification Performance",
     figsize: Tuple[int, int] = (10, 8),
     save_path: Optional[str] = None
 ) -> None:
     """
-    Plot a confusion matrix with annotations.
-    
-    Args:
-        y_true: True labels
-        y_pred: Predicted labels
-        class_names: List of class names
-        title: Title for the plot
-        figsize: Figure size (width, height)
-        save_path: Optional path to save the figure
+    Plot a confusion matrix with specific branding colors:
+    - Diagonal > 0: SP_GREEN
+    - Diagonal == 0: SP_ORANGE
+    - Off-diagonal > 0: SP_RED
+    - Off-diagonal == 0: White/Background
+    - Lines: SP_BROWN
     """
-    cm = confusion_matrix(y_true, y_pred)
+    
+    # 1. Sort labels by frequency (most common first)
+    if isinstance(y_true, pd.Series):
+        class_names = y_true.value_counts().index.tolist()
+    else:
+        class_names = [x[0] for x in Counter(y_true).most_common()]
+    
+    # 2. Generate Confusion Matrix
+    cm = confusion_matrix(y_true, y_pred, labels=class_names)
+    n = cm.shape[0]
+    
+    # 3. Define Logic Masks
+    is_diag = np.eye(n, dtype=bool)
+    is_zero = (cm == 0)
+    
+    # Layer 1: Successes (Diagonal & > 0)
+    mask_green = ~(is_diag & ~is_zero)
+    
+    # Layer 2: Errors (Off-Diagonal & > 0)
+    mask_red = ~(~is_diag & ~is_zero)
+    
+    # Layer 3: The "Empty Success" (Diagonal & == 0)
+    mask_orange = ~(is_diag & is_zero)
     
     plt.figure(figsize=figsize)
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt='d',
-        cmap='Blues',
-        xticklabels=class_names,
-        yticklabels=class_names,
-        cbar_kws={'label': 'Count'}
-    )
+    
+    # Shared settings for all layers
+    heatmap_kwargs = {
+        'annot': True,
+        'fmt': 'd',
+        'cbar': False,
+        'xticklabels': class_names,
+        'yticklabels': class_names,
+        'linewidths': 1,
+        'linecolor': SP_BROWN # Updated line color
+    }
+
+    # Plot Off-Diagonal Errors (Red)
+    sns.heatmap(cm, cmap=ListedColormap([SP_RED]), mask=mask_red, **heatmap_kwargs)
+    
+    # Plot Diagonal Successes (Green)
+    sns.heatmap(cm, cmap=ListedColormap([SP_GREEN]), mask=mask_green, **heatmap_kwargs)
+    
+    # Plot Diagonal Zeros (Orange)
+    sns.heatmap(cm, cmap=ListedColormap([SP_ORANGE]), mask=mask_orange, **heatmap_kwargs)
+    
     plt.title(title, fontsize=14, fontweight='bold')
-    plt.ylabel('True Label', fontsize=12)
-    plt.xlabel('Predicted Label', fontsize=12)
-    plt.xticks(rotation=45, ha='right')
+    plt.ylabel('Actual Character', fontsize=12)
+    plt.xlabel('Predicted Character', fontsize=12)
+    plt.xticks(rotation=90, ha='right')
     plt.yticks(rotation=0)
     plt.tight_layout()
 
