@@ -51,32 +51,73 @@ def evaluate_model(
     data_loader: torch.utils.data.DataLoader,
     device: torch.device,
     class_names: Optional[List[str]] = None,
-    return_predictions: bool = False
+    return_predictions: bool = False,
+    forward_fn: Optional[callable] = None
 ) -> Dict[str, float]:
     """
     Evaluate a PyTorch model on a dataset.
-    
+
     Args:
         model: The PyTorch model to evaluate
         data_loader: DataLoader containing the evaluation dataset
         device: Device to run evaluation on (cuda/cpu)
         class_names: Optional list of class names for reporting
         return_predictions: If True, return predictions and true labels
-        
+        forward_fn: Optional custom forward function for model-specific batch handling
+                   Signature: forward_fn(model, batch, device) -> (outputs, labels)
+
     Returns:
         Dictionary containing evaluation metrics (accuracy, precision, recall, F1)
         If return_predictions=True, also returns (predictions, true_labels)
+
+    Examples:
+        # Auto-detect batch format
+        metrics = evaluate_model(model, test_loader, device)
+
+        # With custom forward function
+        def bert_forward(model, batch, device):
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
+            outputs = model(input_ids, attention_mask)
+            return outputs, labels
+
+        metrics = evaluate_model(model, test_loader, device, forward_fn=bert_forward)
     """
     model.eval()
     model.to(device)
-    
+
     all_predictions = []
     all_labels = []
-    
+
     with torch.no_grad():
         for batch in data_loader:
+            # Use custom forward function if provided
+            if forward_fn is not None:
+                outputs, labels = forward_fn(model, batch, device)
             # Handle different batch formats
-            if isinstance(batch, (list, tuple)):
+            elif isinstance(batch, dict):
+                # Dictionary format (BERT-style or RNN-style)
+                if 'input_ids' in batch and 'attention_mask' in batch:
+                    # BERT-style: {'input_ids', 'attention_mask', 'labels'}
+                    input_ids = batch['input_ids'].to(device)
+                    attention_mask = batch['attention_mask'].to(device)
+                    labels = batch['labels'].to(device)
+                    outputs = model(input_ids, attention_mask)
+                elif 'text' in batch and 'label' in batch:
+                    # RNN-style: {'text', 'label', 'length'}
+                    text = batch['text'].to(device)
+                    labels = batch['label'].to(device)
+                    lengths = batch['length']
+                    outputs = model(text, lengths)
+                else:
+                    raise ValueError(
+                        f"Unexpected dictionary batch format. Keys: {batch.keys()}. "
+                        f"Expected either ('input_ids', 'attention_mask', 'labels') for BERT "
+                        f"or ('text', 'label', 'length') for RNN."
+                    )
+            elif isinstance(batch, (list, tuple)):
+                # Tuple/list format (legacy support)
                 if len(batch) == 3:  # EmbeddingBag format: (text, offsets, labels)
                     text, offsets, labels = batch
                     text = text.to(device)
@@ -88,19 +129,25 @@ def evaluate_model(
                     text = text.to(device)
                     labels = labels.to(device)
                     outputs = model(text)
+                else:
+                    raise ValueError(f"Unexpected tuple/list batch length: {len(batch)}")
             else:
-                raise ValueError(f"Unexpected batch format: {type(batch)}")
-            
+                raise ValueError(
+                    f"Unexpected batch format: {type(batch)}. "
+                    f"Expected dict, tuple, or list. "
+                    f"Consider providing a custom forward_fn."
+                )
+
             # Get predictions
             predictions = torch.argmax(outputs, dim=1)
-            
+
             all_predictions.extend(predictions.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-    
+
     # Convert to numpy arrays
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
-    
+
     # Calculate metrics (macro-averaged for multiclass)
     metrics = {
         'accuracy': accuracy_score(all_labels, all_predictions),
@@ -108,10 +155,10 @@ def evaluate_model(
         'recall': recall_score(all_labels, all_predictions, average='macro', zero_division=0),
         'f1_score': f1_score(all_labels, all_predictions, average='macro', zero_division=0)
     }
-    
+
     if return_predictions:
         return metrics, all_predictions, all_labels
-    
+
     return metrics
 
 def load_model_from_checkpoint(
