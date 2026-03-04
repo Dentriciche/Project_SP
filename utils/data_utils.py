@@ -55,7 +55,4 @@ def create_character_mapping(df, top_characters: List[str]):
     for char, label in char_to_label.items():
         print(f"  {label}: {char}")
 
-    # Extract texts and labels
-    texts = df['Line'].tolist()
-    labels = df['Character'].map(char_to_label).tolist()
-    return char_to_label, label_to_char, texts, labels
+    return char_to_label, label_to_char

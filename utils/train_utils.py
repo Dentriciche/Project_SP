@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR, ReduceLROnPlateau, CosineAnnealingLR, StepLR
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
+from focal_loss import FocalLoss
 
 
 # ============================================================================
@@ -71,7 +72,8 @@ def get_loss_function(loss_type='cross_entropy', class_weights=None, **kwargs):
         # You'd need to implement FocalLoss class separately
         alpha = kwargs.get('alpha', 0.25)
         gamma = kwargs.get('gamma', 2.0)
-        # return FocalLoss(alpha=alpha, gamma=gamma, weight=class_weights)
+        return FocalLoss(alpha=class_weights, gamma=gamma, task_type="multi-class", num_classes=31)
+    
         raise NotImplementedError("Focal loss requires custom implementation")
     
     else:
