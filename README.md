@@ -32,6 +32,10 @@ The preparation workflow expects at least the following columns:
 - generating character-to-label mappings
 - exporting parquet files for downstream modeling notebooks
 
+`02 - Data Load & Processing/02 - exploratory_data_analysis.ipynb`. 
+
+This notebook summarizes the dataset, reviews season-level distributions, and analyzes character-level coverage using `num_lines`, `num_episodes`, and `num_seasons` to support character-selection decisions.
+
 Prepared inputs are already included in `01 - Inputs/`, including:
 
 - raw and filtered parquet datasets
@@ -42,7 +46,7 @@ Prepared inputs are already included in `01 - Inputs/`, including:
 ## Repository Layout
 
 - `01 - Inputs/` — prepared datasets, split files, and label mappings
-- `02 - Data Load & Processing/` — preprocessing and exploratory notebooks
+- `02 - Data Load & Processing/` — data loading, preprocessing, and exploratory analysis notebooks
 - `03 - Model Building/` — training notebooks, scripts, and checkpoints
 - `04 - Model Evaluation and Assessment/` — reserved for evaluation material; 
 - `05 - Outputs/` — saved experiment outputs and zipped artifacts
@@ -123,7 +127,11 @@ pip install fasttext-wheel
 1. **Prepare or refresh the data**
    - Run `02 - Data Load & Processing/01 - load_and_preprocess_data.ipynb`
 
-2. **Run a modeling notebook** from `03 - Model Building/`, for example:
+2. **Review the exploratory data analysis**
+   - Run `02 - Data Load & Processing/02 - exploratory_data_analysis.ipynb`
+   - Use it to inspect dataset structure, season-level summaries, and top-K character coverage before training
+
+3. **Run a modeling notebook** from `03 - Model Building/`, for example:
    - `baseline_logistic_regression.ipynb`
    - `transformer_bert_model.ipynb`
    - `transformer_distilbert_model.ipynb`
