@@ -36,7 +36,7 @@ The preparation workflow expects at least the following columns:
 
 This notebook summarizes the dataset, reviews season-level distributions, and analyzes character-level coverage using `num_lines`, `num_episodes`, and `num_seasons` to support character-selection decisions.
 
-Prepared inputs are already included in `01 - Inputs/`, including:
+Prepared inputs go in `01 - Inputs/`,after executing the loading and processing notebook including:
 
 - raw and filtered parquet datasets
 - train / validation / test splits
