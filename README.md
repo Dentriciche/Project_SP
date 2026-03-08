@@ -1,6 +1,4 @@
-# Project_SP
-
-## South Park Dialogue Speaker Classification
+# South Park Dialogue Speaker Classification
 
 This repository is a multi-class NLP project focused on predicting **which South Park character spoke a given line of dialogue**. The work compares lightweight baselines with transformer-based, and pre-trained language-model approaches for speaker classification on an imbalanced dialogue dataset.
 
