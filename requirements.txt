@@ -1,4 +1,3 @@
-# Core dependencies confirmed by imports in Project_SP notebooks and utility modules
 pandas
 numpy
 scikit-learn
@@ -11,4 +10,3 @@ datasets
 
 # Optional notebook-specific dependencies (install separately if needed)
 # fasttext-wheel   # for 03 - Model Building/fast text models.ipynb
-# optuna           # for 03 - Model Building/transformer_bert_model_optuna.ipynb
