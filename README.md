@@ -74,7 +74,7 @@ Prepared inputs are already included in `01 - Inputs/`, including:
 ### Fine-tuning pre-trained models
 
 - **Qwen** (`qwen pre-trained fine-tuning.ipynb`, `qwen pre-trained fine-tuning f1_for_early_stopping.ipynb`)
-  Fine-tunes the final layer of the 0.6B parameter Qwen model on the South Park dataset.
+  Fine-tunes the final layer of the 0.6B parameter Qwen 3 model on the South Park dataset.
 
 - **DistilBERT fine-tuning** (`transformer_distilbert_model.ipynb`, `transformer_distilbert_model_val_loss.ipynb`)
   - Fines-tunes a pre-trained Hugging Face DistilBERT classifier.
