@@ -50,19 +50,37 @@ Prepared inputs are already included in `01 - Inputs/`, including:
 
 ## Modeling Approaches
 
-- **Baseline logistic classifier** (`baseline_logistic_regression.ipynb`)
-  - Tokenization + vocabulary lookup + trainable embeddings + mean pooling + linear classification.
+### Baseline Methods
 
-- **Custom BERT-style transformer** (`transformer_bert_model.ipynb`, `transformer_bert_model_optuna.ipynb`)
-  - Transformer encoder trained from scratch for classification.
-- **DistilBERT fine-tuning** (`transformer_distilbert_model.ipynb`, `transformer_distilbert_model_val_loss.ipynb`)
-  - Fine-tunes a pre-trained Hugging Face DistilBERT classifier.
-- **fastText experiments** (`fast text models.ipynb`)
-  - Uses supervised fastText, including autotuning.
 - **Zero-shot BART** (`zero-shot BART.ipynb`)
-  - Uses Hugging Face zero-shot classification as a non-fine-tuned baseline.
-- **Qwen notebooks**
-  - Experimental LLM-based workflows; review notebook-specific setup before use.
+  Uses Hugging Face zero-shot classification as a non-fine-tuned baseline.
+
+- **Multi Layer Perceptron (MLP)**(`baseline_logistic_regression.ipynb`)
+  Tokenization + vocabulary lookup + trainable embeddings + mean pooling + linear classification.
+
+  Used with zero hidden layers acts as a baseline logistic regression model.
+
+- **fastText model** (`fast text models.ipynb`)
+  Uses supervised fastText, including autotuning.
+    Developed by Facebook, fastText is a library for learning of fast text representations and efficient text classification.
+
+### From-scratch transformer models
+
+
+- **Custom BERT-style transformer** (`transformer_bert_model.ipynb`)
+  - Transformer encoder trained from scratch for classification.
+  - It uses the BERT architecture but with a smaller number of heads and layers.
+
+### Fine-tuning pre-trained models
+
+- **Qwen** (`qwen pre-trained fine-tuning.ipynb`, `qwen pre-trained fine-tuning f1_for_early_stopping.ipynb`)
+  Fine-tunes the final layer of the 0.6B parameter Qwen model on the South Park dataset.
+
+- **DistilBERT fine-tuning** (`transformer_distilbert_model.ipynb`, `transformer_distilbert_model_val_loss.ipynb`)
+  - Fines-tunes a pre-trained Hugging Face DistilBERT classifier.
+  - Here we are doing a full fine-tuning of the model as the model is smaller and faster to train.
+
+
 
 ## Setup
 
